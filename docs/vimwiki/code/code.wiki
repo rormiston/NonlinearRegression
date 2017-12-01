@@ -1,0 +1,23 @@
+= Contents =
+- [[#Reading the Docs|Reading the Docs]]
+- [[#NLR Code Repository|NLR Code Repository]]
+    - [[#Subtitle|Subtitle]]
+
+= Reading the Docs =
+For more information about the code itself, extra examples etc, check out
+the documentation [[https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/build/html/|here]]
+
+= NLR Code Repository =
+
+The code for this repo is long and wonderful. The docs contain a lot
+of useful info and things like math $f(x, y) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-(x-y)^2/2\sigma^2}$.
+They also have _italicized_ things, *bold* things and `code highlighting`.
+
+== Subtitle ==
+Trust me, you want to run this code snippet:
+
+{{{class="prettyprint language-bash"'
+$ git clone git@git.ligo.org:NoiseCancellation/NonlinearRegression.git'
+$ cd NonlinearRegression
+$ ./install.sh
+}}}

@@ -1,0 +1,555 @@
+<html>
+<head>
+    <link rel="Stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="Stylesheet" type="text/css" href="/~rich.ormiston/notebook/vimwiki_static/extra.css" />
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <title>notes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+    <div class="container">
+    <a href="../index.html">Index</a>
+    <hr>
+    
+<div id="Contents" class="toc"><h1 id="Contents">Contents</h1></div>
+<ul>
+<li>
+<a href="notes.html#Linear Effects">Linear Effects</a>
+
+<ul>
+<li>
+<a href="notes.html#Data Comparison">Data Comparison</a>
+
+<ul>
+<li>
+<a href="notes.html#Mock Data">Mock Data</a>
+
+<li>
+<a href="notes.html#Real Data">Real Data</a>
+
+</ul>
+<li>
+<a href="notes.html#Using MSE to Predict DARM">Using MSE to Predict DARM</a>
+
+<ul>
+<li>
+<a href="notes.html#Mock Results">Mock Data</a>
+
+<li>
+<a href="notes.html#Real Results">Real Data</a>
+
+</ul>
+</ul>
+<li>
+<a href="notes.html#Results">Results</a>
+
+<ul>
+<li>
+<a href="notes.html#Original bilinearRegressionReal.py Script">Original bilinearRegressionReal.py Script</a>
+
+<li>
+<a href="notes.html#New NN Script">New NN Script</a>
+
+<ul>
+<li>
+<a href="notes.html#Mock Data Results">Mock Data</a>
+
+<li>
+<a href="notes.html#Loss Curves">Loss Curves</a>
+
+</ul>
+<li>
+<a href="notes.html#Effects of Notching">Effects of Notching</a>
+
+<ul>
+<li>
+<a href="notes.html#No Notching">No Notching</a>
+
+<li>
+<a href="notes.html#Notching DARM">Notching DARM</a>
+
+<li>
+<a href="notes.html#Notching DARM and Witnesses">Notching DARM and Witnesses</a>
+
+</ul>
+</ul>
+<li>
+<a href="notes.html#Setting up NonlinearRegression Repo">Setting up NonlinearRegression Repo</a>
+
+<ul>
+<li>
+<a href="notes.html#Log in to a cluster node with GPU support">Log in to a cluster node with GPU support</a>
+
+<li>
+<a href="notes.html#Install the repo">Installing the Repository</a>
+
+<li>
+<a href="notes.html#Running Examples">Running Examples</a>
+
+<ul>
+<li>
+<a href="notes.html#Using Mock Data">Using Mock Data</a>
+
+<li>
+<a href="notes.html#Using Real Data">Using Real Data</a>
+
+</ul>
+<li>
+<a href="notes.html#Command Line Flags">Command Line Flags</a>
+
+<li>
+<a href="notes.html#Building the Webpages">Building the Webpages</a>
+
+</ul>
+</ul>
+
+
+<div id="Linear Effects"><h1 id="Linear Effects">Linear Effects</h1></div>
+<p>
+In an effort to understand the results that we see with the real data
+and the disparity in performance relative to the mock data, I decided to
+look first at more simple, linear correlations between the channels and
+DARM. The results, <em>I think</em> are a clear presentation showing why this
+noise cancellation is a difficult task and demonstrates, at least to some
+degree, what kind of subtraction we can expect to get.
+</p>
+
+<div id="Linear Effects-Data Comparison"><h2 id="Data Comparison">Data Comparison</h2></div>
+<p>
+First, I wanted to simply look at each witness channel and compare it to
+DARM to see if there were common features that would allow us to "easily"
+predict the DARM spectrum based on those channels. In the case of the mock
+data, the answer is a definite "yes."
+</p>
+
+<div id="Linear Effects-Data Comparison-Mock Data"><h3 id="Mock Data">Mock Data</h3></div>
+<p>
+There is very clear structure here. There was obviously an attempt to bury it
+in noise, but it's more than enough for the NN to figure it out.
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/vimwiki/images/mock_data_correlation_1.png" />
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/vimwiki/images/mock_data_correlation_3.png" />
+</p>
+
+
+<div id="Linear Effects-Data Comparison-Real Data"><h3 id="Real Data">Real Data</h3></div>
+<p>
+There is much less structure here. I would submit that it isn't clear that a
+purely linear regression would do very well.
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/real_data_correlation_1.png" />
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/real_data_correlation_2.png" />
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/real_data_correlation_3.png" />
+</p>
+
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/vimwiki/images/real_channel_corr_1.png" />
+</p>
+
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/vimwiki/images/real_channel_corr_3.png" />
+</p>
+
+
+<div id="Linear Effects-Using MSE to Predict DARM"><h2 id="Using MSE to Predict DARM">Using MSE to Predict DARM</h2></div>
+<p>
+I next wanted to look at how well the channels could predict DARM by doing
+Wiener filtering essentially. I start with the MSE cost function
+</p>
+
+<p>
+\(J(w) = \frac{1}{2m}\sum_{i=1}^{N} \left( X_j^{(i)}\cdot w^j -y^{(i)}\right)^2\)
+</p>
+
+<p>
+and then take the gradient and set it to zero. Solving that equation for the
+weights \(w\) I get
+</p>
+
+<p>
+\(\frac{\partial }{\partial w_k} J(w) = 0 \longrightarrow w = (X^T X)^{-1} X^T y\)
+</p>
+
+<p>
+Since \(X\) is just my "feature" matrix and \(y\) is DARM, I can easily calculate
+this (depending on how invertible the term in parenthesis is). I did this
+first for the mock data and then the real data. I don't care about the fit
+as long as it's just a scaling issue. The coherence is all about the phases
+so we can always rescale a reliable witness if we need to. Here what I found
+</p>
+
+<div id="Linear Effects-Using MSE to Predict DARM-Mock Results"><h3 id="Mock Results">Mock Results</h3></div>
+<p>
+Barring some scaling, the fit here is fantastic up to around 20Hz. The phases
+are off, but this should get resolved through scaling I think.
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/Mock_data_analytical.png" />
+</p>
+
+<div id="Linear Effects-Using MSE to Predict DARM-Real Results"><h3 id="Real Results">Real Results</h3></div>
+<p>
+This actually has decent coherence (which I can reproduct with my new NN model)
+but the fit is terrible even with scaling. Some nonlinear weighting (like a NN)
+could be able to fix this. The point of all this isn't to provide results
+for us - this doesn't take into account a nonlinear regression. It just highlihgts
+the stark differences between the real and mock data. I think it might give us <em>some</em>
+idea of the kind of results that we can get though.
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/Real_data_analytical.png" />
+</p>
+
+
+<div id="Results"><h1 id="Results">Results</h1></div>
+<p>
+The results of the new network that I built are shown here. The results are
+very similar to the current network. Maybe I'm convincing myself that I see more
+than there is, but I think the new one does perform slightly better. I have not
+applied any filtering whatsoever - no whitening, no notching calibration lines,
+nothing. I think this is part of the reason that I get these harmonics that show
+up around 36, 48 and 60Hz. Eliminating those may go a long way towards making the
+training a bit smoother. The new script is really nice and clean though. It makes
+more sense to me anyway. I't makes model switching much easier since it's all
+flags now, including the activation parameters. We could effectively write
+wrapper scripts that do brute force hyperparameterization now.
+</p>
+
+<div id="Results-Original bilinearRegressionReal.py Script"><h2 id="Original bilinearRegressionReal.py Script">Original bilinearRegressionReal.py Script</h2></div>
+<p>
+Running with 10 epochs
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/vimwiki/images/bilinearRegressionReal.png" />
+</p>
+
+
+<div id="Results-New NN Script"><h2 id="New NN Script">New NN Script</h2></div>
+<p>
+For the new script, I played around with the activation function tuning (I
+did not do any tuning of the model atchitecture yet). Depending on what I
+chose to do, I could get an interesting peak around 12Hz that is visible in
+the <code>bilinearRegressionReal.py</code> script
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/NonlinearRegression/docs/wiki/images/Sharp12HzPeak.png" />
+</p>
+
+<p>
+But for the most part, the results look something like the plot below.
+I'm assuming that because I'm not filtering, I'm able to catch the
+60Hz and 120Hz harmonics pretty strongly. It's also nice to know that
+using a completely different, independent approach to the problem that
+the results are so somilar. It means that we must be doing something
+right.
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/Validation-LSTM-RMSProp_Great_Loss_and_Fit.png" />
+</p>
+
+<p>
+I think that this is pretty good and based off of the linear, analytical solution,
+it's probably close to as good as we're going to get if those two things are
+correlated. I don't know if that is necessarily true. Maybe we can do much better.
+Perhaps we could try to delibrately add some nonlinearity to the model? For
+example, I could take products of channels and compare those to DARM like I did above
+and see if are any that contain "features" that we could use. Nominally, the NN should
+be able to learn these things, so I don't know if it is really worth looking into all that
+much.
+</p>
+
+<div id="Results-New NN Script-Mock Data Results"><h3 id="Mock Data Results">Mock Data Results</h3></div>
+<p>
+The mock data is essentially the same as before. Again, it's nice to see consistency
+between different approaches.
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/Mock_prediction.png" />
+</p>
+
+<div id="Results-New NN Script-Loss Curves"><h3 id="Loss Curves">Loss Curves</h3></div>
+<p>
+Not much to say other than that things look pretty good
+</p>
+
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/loss_history_comparison.png" />
+</p>
+
+<p>
+Anyway, this is where things are at. I'm going to play around with some new model
+architectures and see what kind of results I can get. I'm also messing around with
+the normalization to see if the feature scaling makes an important difference. I'm
+having Sharan make me some time series data with injections so we can verify that
+we're not losing SNR after subtraction.
+</p>
+
+
+<div id="Results-Effects of Notching"><h2 id="Effects of Notching">Effects of Notching</h2></div>
+<p>
+Each of the following uses a reduced (arbitratily) channel list
+</p>
+
+<div id="Results-Effects of Notching-No Notching"><h3 id="No Notching">No Notching</h3></div>
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/Short_Chan_List.png" />
+</p>
+
+<div id="Results-Effects of Notching-Notching DARM"><h3 id="Notching DARM">Notching DARM</h3></div>
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/DARM_notch_only_Short_list.png" />
+</p>
+
+<div id="Results-Effects of Notching-Notching DARM and Witnesses"><h3 id="Notching DARM and Witnesses">Notching DARM and Witnesses</h3></div>
+<p>
+<img src="https://ldas-jobs.ligo.caltech.edu/~rich.ormiston/noise_cancellation/images/Notched_Short_chan_list.png" />
+</p>
+
+
+<div id="Setting up NonlinearRegression Repo"><h1 id="Setting up NonlinearRegression Repo">Setting up NonlinearRegression Repo</h1></div>
+
+<div id="Setting up NonlinearRegression Repo-Log in to a cluster node with GPU support"><h2 id="Log in to a cluster node with GPU support">Log in to a cluster node with GPU support</h2></div>
+<p>
+I do everything on CIT. Michael prefers to use the dev box <em>dgx-1</em> on LHO. I don't see much
+of a performance difference between the two, though the dev box probably sees less traffic
+</p>
+<ul>
+<li>
+CIT: <code>gsissh ldas-pcdev11.ligo.caltech.edu</code>
+
+<li>
+LHO: Pick any node then do <code>ssg dgx-1</code>. You may need an account for this. You can ask Stuart Anderson about that
+
+<li>
+LLO: <code>gsissh ldas-pcdev2.ligo-la.caltech.edu</code>
+
+</ul>
+
+<div id="Setting up NonlinearRegression Repo-Install the repo"><h2 id="Install the repo">Install the repo</h2></div>
+<p>
+Hopefully this part worked for you.
+</p>
+
+<pre class="prettyprint language-bash">
+$ git clone git@git.ligo.org:NoiseCancellation/NonlinearRegression.git
+$ cd NonlinearRegression
+$ ./install.sh
+</pre>
+
+<p>
+This installs tensorflow (<code>pip show tensorflow</code>) with CPU support. To run on GPUs,
+you should be able to just install a different tensorflow
+</p>
+
+<pre class="prettyprint language-bash">
+$ source $HOME/noise_cancellation/bin/activate
+$ pip uninstall tensorflow
+$ pip install tensorflow-gpu
+</pre>
+
+<p>
+You <em>may</em> need to export the path to the CUDA libraries in order
+to use the GPUs. I can't remember if I needed to do that or not.
+To set the path, do
+</p>
+<pre class="prettyprint language-bash">
+$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cudnn-5.1/cuda/lib64
+</pre>
+
+<p>
+You can also install TF with GPU support directly from the website in case you want to get a
+particular version. The pip install shown above gets you the same version as below
+</p>
+<pre class="prettyprint language-bash">
+$ pip install --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.3.0-cp27-none-linux_x86_64.whl
+</pre>
+
+<div id="Setting up NonlinearRegression Repo-Running Examples"><h2 id="Running Examples">Running Examples</h2></div>
+<p>
+Assuming that you have mock data or real data generated and have this
+data in <code>NonlinearRegression/tensorflow/timedelay/Data</code>, you should be able to
+run these examples out-of-the-box.
+</p>
+
+<div id="Setting up NonlinearRegression Repo-Running Examples-Using Real Data"><h3 id="Using Real Data">Using Real Data</h3></div>
+<pre class="prettyprint language-bash">
+$ python train_network.py -b 1000 --activation linear -e 50 -opt rmsprop --rho 0.4 -lr 0.001 --decay 0.5
+</pre>
+
+<div id="Setting up NonlinearRegression Repo-Running Examples-Using Mock Data"><h3 id="Using Mock Data">Using Mock Data</h3></div>
+<pre class="prettyprint language-bash">
+$ python train_network.py -d mock -opt rmsprop -e 100
+</pre>
+
+
+<p>
+To verify that you're indeed using GPUs, you can run <code>top</code> at the same time that you're
+running one of those scripts. If your CPU usage is fairly small (under \(\sim100\%\)) then
+you're using a GPU. You can <a href="https:&#47;&#47;www.tensorflow.org&#47;tutorials&#47;using_gpu">run TF directly</a> and print out what it is running on if
+you wanted a more explicit output.
+</p>
+
+
+<div id="Setting up NonlinearRegression Repo-Command Line Flags"><h2 id="Command Line Flags">Command Line Flags</h2></div>
+<p>
+To see all of the flags, use <code>-h</code>
+</p>
+<pre class="prettyprint language-bash">
+$ python train_network.py -h
+usage: train_network.py [-h] [--model_type MODEL_TYPE]
+                        [--train_frac TRAIN_FRAC] [--datafile DATAFILE]
+                        [--data_type DATA_TYPE] [--dropout DROPOUT]
+                        [--recurrent_dropout RECURRENT_DROPOUT] [--loss LOSS]
+                        [--activation ACTIVATION] [--optimizer OPTIMIZER]
+                        [--epochs EPOCHS] [--Nlayers NLAYERS]
+                        [--batch_size BATCH_SIZE] [--shuffle SHUFFLE]
+                        [--verbose VERBOSE] [--tfft TFFT] [--plotDir PLOTDIR]
+                        [--plotStrain PLOTSTRAIN] [--doPlots DOPLOTS]
+                        [--lookback LOOKBACK] [--learning_rate LR]
+                        [--decay DECAY] [--momentum MOMENTUM]
+                        [--nesterov NESTEROV] [--beta_1 BETA_1]
+                        [--beta_2 BETA_2] [--epsilon EPSILON] [--rho RHO]
+                        [--interferometer IFO] [--save_data SAVE_DATA]
+                        [--doLines DOLINES] [--chans CHANS] [--width WIDTH]
+                        [--notch_freqs NOTCH_FREQS [NOTCH_FREQS ...]]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --model_type MODEL_TYPE, -m MODEL_TYPE
+                        pick model type to use
+  --train_frac TRAIN_FRAC
+                        ratio of dataset used for training
+  --datafile DATAFILE   data file to read from
+  --data_type DATA_TYPE, -d DATA_TYPE
+                        real or mock data
+  --dropout DROPOUT, -D DROPOUT
+                        dropout regularization
+  --recurrent_dropout RECURRENT_DROPOUT, -RD RECURRENT_DROPOUT
+                        recurrent dropout used in RNN memory blocks
+  --loss LOSS           loss function for neural network
+  --activation ACTIVATION, -a ACTIVATION
+                        activation function for neural network
+  --optimizer OPTIMIZER, -opt OPTIMIZER
+                        optimizing function for neural network
+  --epochs EPOCHS, -e EPOCHS
+                        Number of iterations of NN training
+  --Nlayers NLAYERS, -l NLAYERS
+                        Number of layers for the Dense network
+  --batch_size BATCH_SIZE, -b BATCH_SIZE
+                        number of samples to be trained at once
+  --shuffle SHUFFLE, -s SHUFFLE
+                        shuffle training data
+  --verbose VERBOSE, -v VERBOSE
+                        output verbosity
+  --tfft TFFT           Use to set overlapping segments for PSD
+  --plotDir PLOTDIR     directory to store plots
+  --plotStrain PLOTSTRAIN
+                        plot Strain data
+  --doPlots DOPLOTS     enable plotting
+  --lookback LOOKBACK, -lb LOOKBACK
+                        timesteps to look back
+  --learning_rate LR, -lr LR
+                        optimizer learning rate
+  --decay DECAY         optimizer learning rate decay
+  --momentum MOMENTUM   optimizer momentum
+  --nesterov NESTEROV   use nesterov momentum
+  --beta_1 BETA_1       beta_1 params for optimizer
+  --beta_2 BETA_2       beta_2 params for optimizer
+  --epsilon EPSILON     optimizer param
+  --rho RHO             adadelta &amp; rmsprop optimizer params
+  --interferometer IFO, -ifo IFO
+                        L1 or H1
+  --save_data SAVE_DATA
+                        save data to mat file
+  --doLines DOLINES     remove lines from raw DARM
+  --chans CHANS         channel(s) to notch. Either 'darm' or 'all'
+  --width WIDTH         notching bin width
+  --notch_freqs NOTCH_FREQS [NOTCH_FREQS ...]
+                        frequencies to notch
+</pre>
+
+
+<div id="Setting up NonlinearRegression Repo-Building Webpages"><h2 id="Building Webpages">Building Webpages</h2></div>
+<p>
+Making the webpages like the ones you saw should just be one command. Let's first run two
+models that we wish to compare
+</p>
+
+<pre class="prettyprint language-bash">
+$ python train_network.py -b 1000 --activation linear -e 50 -opt rmsprop --rho 0.4 -lr 0.001 --decay 0.5
+$ python train_network.py --activation linear -e 10 -opt adadelta -lr 1 --rho 0.1 --decay 0.0 -m MLP
+</pre>
+
+<p>
+One uses LSTMs and the other uses multi-layer perceptrons. Next, specify the models to
+compare in the config file here: <code>$HOME/noise_cancellation/configs/configs.ini</code>. It should look
+something like this
+</p>
+
+<pre class="prettyprint language-bash">
+[run]
+basedir = /home/rana.adhikari/git_repositories/NonlinearRegression
+models  = LSTM, MLP
+</pre>
+
+<p>
+You can make as many models as you want and add them here for comparison. I wouldn't add more than
+three models at once otherwise the figures start getting a bit small. Now we can build the webpages
+</p>
+
+<pre class="prettyprint language-bash">
+$ nlr-compare-models
+Using Tensorflow backend
+Using Tensorflow backend
+[+] Webpages built successfully
+</pre>
+
+<p>
+The webpages are built in <code>NonllinearRegression/HTML</code>. Soft link this directory to your
+<code>public_html</code> directory so you can view them online.
+</p>
+
+<pre class="prettyprint language-bash">
+$ ln -s $HOME/git_repositories/NonlinearRegression/NonlinearRegression/HTML $HOME/public_html
+</pre>
+
+<p>
+If you're doing this on CIT, you should be able to see your results
+<a href="https:&#47;&#47;ldas-jobs.ligo.caltech.edu&#47;~rana.adhikari&#47;">here</a>
+</p>
+
+<p>
+Let me know if you have any troubles. There are some docs <a href="https:&#47;&#47;ldas-jobs.ligo.caltech.edu&#47;~rich.ormiston&#47;NonlinearRegression&#47;docs&#47;build&#47;html&#47;">here</a> which may help though I haven't updated them in a while so
+they're probably a little dated. I'm in the process of cleaning things up so the
+directory structure should be much nicer in short order. I'll keep you updated.
+</p>
+
+    </div>
+</body>
+<footer>
+    <div class="well">
+        created using <a href="https://github.com/vimwiki/vimwiki" target="_blank">vimwiki</a>
+    </div>
+</footer>
+</html>
+

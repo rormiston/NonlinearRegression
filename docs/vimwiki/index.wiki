@@ -1,0 +1,6 @@
+= Welcome to the Noise Calcellation Wiki =
+
+- [[notes/notes|Analysis & Info]]
+- [[webpages/webpages|Model Comparison Webpages]]
+- [[code/code|Code Stuff Goes Here Maybe?]]
+- [[tuning/tuning|Hyperparameter Tuning]]

@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html lang="en">
+<head>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+    <base href="../../"/>
+    <!-- base href set to NonlinearRegression/NonlinearRegression -->
+
+    <link media="all" href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" rel="stylesheet"></link>
+    <link media="all" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.css" type="text/css" rel="stylesheet" ></link>
+    <link media="all" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.min.css" type="text/css" rel="stylesheet" ></link>
+    <link media="all" href="/~detchar/summary/day/{{ datestrymd }}/static/bootstrap-ligo.min.css" type="text/css" rel="stylesheet" ></link>
+    <link media="all" href="/~detchar/summary/day/{{ datestrymd }}/static/gwsumm.min.css" type="text/css" rel="stylesheet" ></link>
+
+    <title>Nonlinear Regression</title>
+
+    <script src="//code.jquery.com/jquery-1.12.3.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js" type="text/javascript"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/~detchar/summary/day/{{ datestrymd }}/static/bootstrap-ligo.min.js" type="text/javascript"></script>
+    <script src="/~detchar/summary/day/{{ datestrymd }}/static/gwsumm.min.js" type="text/javascript"></script>
+
+</head>
+
+<style style="text/css">
+    .hoverTable{
+        width:100%; 
+        border-collapse:collapse; 
+        font-family: arial, sans-serif;
+    }
+    .hoverTable td{ 
+        padding:8px;
+        border:#dddddd 1px solid;
+        text-align: left;
+    }
+    .hoverTable th{ 
+        padding:8px;
+        border:#dddddd 1px solid;
+        text-align: left;
+        font-size: 20;
+    }
+    .hoverTable tr:nth-child(2n) {
+      background-color: #dddddd;
+    }
+
+    .hoverTable tr:nth-child(2n):hover, .hoverTable tr:hover {
+      background-color: #a8ebb2;
+    }
+
+    .hoverTable tr {
+      background-color: white;
+    }
+</style>
+
+<body>
+
+<header class="navbar navbar-fixed-top navbar-all" role="banner">
+    <div class="container">
+        <button class="navbar-toggle" data-toggle="collapse" type="button" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <a class="navbar-brand step-back" onclick="stepDate(-1)" title="Step back">&laquo;</a>
+        <a id="calendar" data-viewmode="0" title="Show/hide calendar"
+            data-date-format="dd-mm-yyyy" data-date="{{ datestrdmy }}" class="navbar-brand dropdown-toggle">
+                {{ datestrmdy }}
+            <b class="caret"></b></a>
+
+        <a class="navbar-brand step-forward" onclick="stepDate(1)" title="Step forwards">&raquo;</a>
+        
+        <nav class="collapse navbar-collapse" role="navigation">
+            <ul class="nav navbar-nav">
+
+                <li>
+                <a href="HTML/{{ datestrymd }}/index.html">Today</a>
+                </li>
+
+                <li>
+                    <a href="/~detchar/summary/day/{{ datestrymd }}">Detchar Page </a>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                    role="button" aria-haspopup="true" aria-expanded="false">
+                    Runs <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        {% for i in range(runs|length) %}
+                            <li><a href="HTML/{{ datestrymd }}/{{ runs[i] }}">{{ run_names[i] }}</a></li>
+                        {% endfor %}
+
+                    </ul>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="panel-default panel">
+        <div class="panel-heading">
+            <h3>Validation Test: {{ current }} </h3>
+        </div>
+        <div class="panel-body">
+            {% for key in model_data.keys() %}
+                <img src="{{ model_data[key]['validation'] }}" style="float: left; width: {{ img_size }}%; margin-right: 1%; margin-bottom: 0.5em;"/>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="panel-default panel">
+        <div class="panel-heading">
+            <h3>Loss History: {{ current }}</h3>
+        </div>
+        <div class="panel-body">
+            {% for key in model_data.keys() %}
+                <img src="{{ model_data[key]['loss'] }}" style="float: left; width: {{ img_size }}%; margin-right: 1%; margin-bottom: 0.5em;"/>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="panel-default panel">
+        <div class="panel-heading">
+            <h3>Optimizer Params</h3>
+        </div>
+        <div class="panel-body">
+            <table class="hoverTable">
+                <tr>
+                    <th>Optimizer</th>
+                    {% for key in model_data.keys()%}
+                        <th>{{ key }}: {{ opt_names[key] }}</th>
+                    {% endfor %}
+                </tr>
+                
+                {% for j in range(model_data[model_data.keys()[0]]['opt_tup']|length) %}
+                    <tr>
+                    {% for i in range(model_data.keys()|length) %}
+                        {% if i == 0 %}
+                            <td>{{ model_data[model_data.keys()[i]]['opt_tup'][j][0] }}</td>
+                        {% endif %}
+                        <td>{{ model_data[model_data.keys()[i]]['opt_tup'][j][1] }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+
+            </table>
+
+        </div>
+    </div>
+
+
+    <div class="panel-default panel">
+        <div class="panel-heading">
+            <h3>run_test Function Params</h3>
+        </div>
+        <div class="panel-body">
+            <table class="hoverTable">
+                <tr>
+                    <th>parameters</th>
+                    {% for key in model_data.keys() %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+                
+                {% for j in range(model_data[model_data.keys()[0]]['run_tup']|length) %}
+                    <tr>
+                    {% for i in range(model_data.keys()|length) %}
+                        {% if i == 0 %}
+                            <td>{{ model_data[model_data.keys()[i]]['run_tup'][j][0] }}</td>
+                        {% endif %}
+                        <td>{{ model_data[model_data.keys()[i]]['run_tup'][j][1] }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+
+            </table>
+
+        </div>
+    </div>
+
+
+    <div class="panel-default panel">
+        <div class="panel-heading">
+            <h3>Channel List</h3>
+        </div>
+        <div class="panel-body">
+            <table class="hoverTable">
+                <tr>
+                    {% for key in model_data.keys() %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+                
+                {% for j in range(model_data[model_data.keys()[0]]['chan_list']|length) %}
+                    <tr>
+                    {% for i in range(model_data.keys()|length) %}
+                        <td>{{ model_data[model_data.keys()[i]]['chan_list'][j] }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <p>NonlinearRegression v0.1 &copy; 2017.</p>
+                <p>This software was created at the California Institute of Technology
+                by Rana Adhikari, Rich Ormiston, Michael Coughlin, Andrew Matas,
+                Eric Quintero, Jenne Driggers, Nikhil Mukund, Thomas Massinger, Lydia
+                Nevin, Hang Yu and Rory James Smith</p>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>

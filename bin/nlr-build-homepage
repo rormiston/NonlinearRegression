@@ -1,0 +1,170 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import argparse
+import os
+import re
+import NonlinearRegression.tools.analyze_run_data as nlr
+from gwpy.time import tconvert
+from datetime import datetime
+from ConfigParser import ConfigParser
+from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoader
+from NonlinearRegression.tools import nlr_exceptions
+
+
+# Get the Jinja environment
+env = Environment(loader     = PackageLoader('NonlinearRegression', 'templates'),
+                  autoescape = select_autoescape(['html']))
+
+default_ini = os.getenv('HOME') + '/noise_cancellation/configs/configs.ini'
+
+
+def parse_command_line():
+    """
+    parse command line flags
+    """
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--ini-file", "-i",
+                        help    = "Full path to ini file",
+                        dest    = "ini_file",
+                        default = default_ini,
+                        type    = str)
+
+    params = parser.parse_args()
+    return params
+
+
+# Read the config file
+params   = parse_command_line()
+ini_file = params.ini_file
+nlr_exceptions.checkFileExists(ini_file)
+settings = ConfigParser()
+settings.read(ini_file)
+
+# Use regular expressions to parse the config file so we dont 
+# need to worry about sticking with a particular convention
+regex  = re.compile(r'\w+')
+models = sorted(regex.findall(settings.get('run', 'models')))
+
+model_version_dict = {}
+for model in models:
+    regex_model = re.compile(r'[a-zA-Z]+')
+    basemodel   = regex_model.findall(model)[0]
+    regex_num   = re.compile(r'\d+')
+    try:
+        version = regex_num.findall(model)[0]
+    except IndexError:
+        version = '0'
+
+    model_version_dict[basemodel] = version
+
+if models[0] == "":
+    print("Must specify models to compare in the config file here:")
+    print(default_ini)
+    sys.exit(1)
+
+basedir     = settings.get('run', 'basedir')
+param_dir   = basedir + "/NonlinearRegression/tensorflow/timedelay/params/"
+models_dict = {}
+
+# Get time for webpages
+starttime = tconvert(tconvert('now'))
+daystart  = int(tconvert(datetime(starttime.year,
+                                  starttime.month,
+                                  starttime.day)))
+
+save_webpage_str = '%d%02d%02d' % (starttime.year,
+                                   starttime.month,
+                                   starttime.day)
+
+# Various date strings needed for the webpage
+datestrmdy         = '%02d-%02d-%d' % (starttime.month, starttime.day, starttime.year)
+datestrdmy         = '%02d-%02d-%d' % (starttime.day, starttime.month, starttime.year)
+datestrymd         = '%d%02d%02d'   % (starttime.year, starttime.month, starttime.day)
+to_HTML            = '/NonlinearRegression/HTML/{}'.format(save_webpage_str)
+webpage_output_dir = basedir + to_HTML
+architecture       = {}
+min_loss_dict      = {}
+
+# Get mat files and loss data for current models
+for model, version in model_version_dict.items():
+    model_dir            = param_dir + model + '/'
+    model_data           = model_dir + 'Results_TFregression-{}.mat'.format(version)
+    min_loss_data        = model_dir + 'minLoss-{}.txt'.format(version)
+    min_loss_dict[model] = min_loss_data
+    models_dict[model]   = [model_data, version]
+    architecture[model]  = ('tensorflow/timedelay/params/{0}/Figures/'
+                            'model-{1}.png'.format(model, version))
+
+for model, loss in min_loss_dict.items():
+    min_loss_dict[model] = nlr.read_minimum_loss(loss)
+
+# Compare model stats and make plots
+compare_models = nlr.ModelComparison(models_dict)
+compare_models.get_loss_specs()
+most_improved  = compare_models.most_improved()
+lowest_cost    = compare_models.lowest_cost()
+compare_models.plot_losses(plotDir=webpage_output_dir)
+
+
+for i, mod in enumerate(models):
+    if mod == 'LSTM':
+        models[i] = 'LSTM0'
+    if mod == 'MLP':
+        models[i] = 'MLP0'
+    if mod == 'GRU':
+        models[i] = 'GRU0'
+    if mod == 'other':
+        models[i] = 'other0'
+
+pie_plot_train = 'HTML/{0}/{1}-training-losses.png'.format(save_webpage_str,
+                                                           '-'.join(sorted(models)))
+pie_plot_test  = 'HTML/{0}/{1}-testing-losses.png'.format(save_webpage_str,
+                                                          '-'.join(sorted(models)))
+pie_plots      = {'train': pie_plot_train, 'test': pie_plot_test}
+
+# make sure path exists
+if not os.path.isdir(webpage_output_dir):
+    os.makedirs(webpage_output_dir)
+
+# make sure new html exists before trying to write to it
+if not os.path.isfile(webpage_output_dir + "/index.html"):
+    os.system('touch {}'.format(webpage_output_dir + "/index.html"))
+
+# Collect files for linking pages together
+runs        = os.listdir(webpage_output_dir)
+runs        = [r for r in runs if r != "index.html"]
+runs        = [r for r in runs if not r.endswith(".png")]
+run_names   = [' vs. '.join(run.split('-')[:-1]) for run in runs]
+model_names = ' vs. '.join(architecture.keys())
+
+# Give each link a version number for clarity
+v = 1
+for index, name in enumerate(run_names):
+    temp = run_names[:index]
+    if name in temp:
+        name = '{0} v{1}'.format(name, v)
+        run_names[index] = name
+        v += 1
+
+if len(architecture.keys()) == 1:
+    img_size = 70.0
+else:
+    img_size = 97.0 // len(architecture.keys())
+
+# fill in the template
+template = nlr_exceptions.loadTemplate(env, 'top_page.html')
+webpage  = open('{0}/index.html'.format(webpage_output_dir), 'w')
+print >> webpage, template.render(datestrdmy    = datestrdmy,
+                                  datestrmdy    = datestrmdy,
+                                  datestrymd    = datestrymd,
+                                  pie_plots     = pie_plots,
+                                  most_improved = most_improved,
+                                  lowest_cost   = lowest_cost,
+                                  architecture  = architecture,
+                                  model_names   = model_names,
+                                  img_size      = img_size,
+                                  min_loss_dict = min_loss_dict,
+                                  runs          = runs,
+                                  run_names     = run_names)
+webpage.close()

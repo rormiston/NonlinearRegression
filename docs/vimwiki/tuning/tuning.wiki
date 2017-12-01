@@ -1,0 +1,27 @@
+= Hyperparameter Tuning Results =
+- [[#October 2017|October 2017]]
+    - [[#Results from Sat Oct 23 14:01:53 2017|Results from Sat Oct 23 14:01:53 2017]]
+    - [[#Results from Sat Oct 28 13:33:13 2017|Results from Sat Oct 28 13:33:13 2017]]
+
+= October 2017 =
+Output from all hyperparameter optimization runs done in this month
+
+== Results from Sat Oct 23 14:01:53 2017 ==
+==== Command Used ====
+`python hyper_opt.py -opt rmsprop adamax -lr 0.1 0.01 0.001 -e 2 -m LSTM`
+
+==== Best Run ====
+*Mean:* 2.11928164829e-06
+
+*Params:* {'optimizer': 'rmsprop', 'lr': 0.1}
+
+
+== Results from Sat Oct 28 13:33:13 2017 ==
+==== Command Used ====
+`python hyper_opt.py -opt nadam sgd -lr 0.2 0.02 --neurons 5 15 35 -e 2 -m other`
+
+==== Best Run ====
+*Mean:* 3.38572954229e-06
+
+*Params:* {'optimizer': 'nadam', 'lr': 0.02, 'neuron': 15}
+

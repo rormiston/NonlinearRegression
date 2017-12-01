@@ -1,0 +1,33 @@
+# core requirements
+theano>=0.9.0
+tensorflow>=1.0.1
+keras>=2.0.1
+six>=1.5
+numpy>=1.11
+scipy>=0.16
+astropy>=1.2.1
+matplotlib>=1.4.1
+h5py>=1.3
+gwpy>=0.4
+ligotimegps>=1.1
+jinja2>=2.9.5
+pydot>=1.2.3
+graphviz>=0.8
+pyswarm>=0.6
+pycbc>=1.8.0
+bs4>=0.0.1
+scikit-learn>=0.19.0
+seaborn>=0.8.1
+pandas>=0.20.3
+
+# docs
+sphinx
+sphinx_rtd_theme
+numpydoc
+
+# tests
+pytest>=3.1
+coveralls
+mock
+freezegun
+sqlparse

@@ -1,0 +1,78 @@
+<html>
+<head>
+    <link rel="Stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="Stylesheet" type="text/css" href="/~rich.ormiston/notebook/vimwiki_static/extra.css" />
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <title>tuning</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+    <div class="container">
+    <a href="../index.html">Index</a>
+    <hr>
+    
+<div id="Hyperparameter Tuning Results"><h1 id="Hyperparameter Tuning Results">Hyperparameter Tuning Results</h1></div>
+<ul>
+<li>
+<a href="tuning.html#October 2017">October 2017</a>
+
+<ul>
+<li>
+<a href="tuning.html#Results from Sat Oct 23 14:01:53 2017">Results from Sat Oct 23 14:01:53 2017</a>
+
+<li>
+<a href="tuning.html#Results from Sat Oct 28 13:33:13 2017">Results from Sat Oct 28 13:33:13 2017</a>
+
+</ul>
+</ul>
+
+<div id="October 2017"><h1 id="October 2017">October 2017</h1></div>
+<p>
+Output from all hyperparameter optimization runs done in this month
+</p>
+
+<div id="October 2017-Results from Sat Oct 23 14:01:53 2017"><h2 id="Results from Sat Oct 23 14:01:53 2017">Results from Sat Oct 23 14:01:53 2017</h2></div>
+<div id="October 2017-Results from Sat Oct 23 14:01:53 2017-Command Used"><h4 id="Command Used">Command Used</h4></div>
+<p>
+<code>python hyper_opt.py -opt rmsprop adamax -lr 0.1 0.01 0.001 -e 2 -m LSTM</code>
+</p>
+
+<div id="October 2017-Results from Sat Oct 23 14:01:53 2017-Best Run"><h4 id="Best Run">Best Run</h4></div>
+<p>
+<span id="October 2017-Results from Sat Oct 23 14:01:53 2017-Best Run-Mean:"></span><strong id="Mean:">Mean:</strong> 2.11928164829e-06
+</p>
+
+<p>
+<span id="October 2017-Results from Sat Oct 23 14:01:53 2017-Best Run-Params:"></span><strong id="Params:">Params:</strong> {'optimizer': 'rmsprop', 'lr': 0.1}
+</p>
+
+
+<div id="October 2017-Results from Sat Oct 28 13:33:13 2017"><h2 id="Results from Sat Oct 28 13:33:13 2017">Results from Sat Oct 28 13:33:13 2017</h2></div>
+<div id="October 2017-Results from Sat Oct 28 13:33:13 2017-Command Used"><h4 id="Command Used">Command Used</h4></div>
+<p>
+<code>python hyper_opt.py -opt nadam sgd -lr 0.2 0.02 --neurons 5 15 35 -e 2 -m other</code>
+</p>
+
+<div id="October 2017-Results from Sat Oct 28 13:33:13 2017-Best Run"><h4 id="Best Run">Best Run</h4></div>
+<p>
+<span id="October 2017-Results from Sat Oct 28 13:33:13 2017-Best Run-Mean:"></span><strong id="Mean:">Mean:</strong> 3.38572954229e-06
+</p>
+
+<p>
+<span id="October 2017-Results from Sat Oct 28 13:33:13 2017-Best Run-Params:"></span><strong id="Params:">Params:</strong> {'optimizer': 'nadam', 'lr': 0.02, 'neuron': 15}
+</p>
+
+    </div>
+</body>
+<footer>
+    <div class="well">
+        created using <a href="https://github.com/vimwiki/vimwiki" target="_blank">vimwiki</a>
+    </div>
+</footer>
+</html>
+

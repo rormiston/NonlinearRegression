@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html lang="en">
+ <head>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <base href=""/>
+  <!-- base href set to NonlinearRegression/NonlinearRegression -->
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css"/>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.css" media="all" rel="stylesheet" type="text/css"/>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker.min.css" media="all" rel="stylesheet" type="text/css"/>
+  <link href="/~detchar/summary/day/20171017/static/bootstrap-ligo.min.css" media="all" rel="stylesheet" type="text/css"/>
+  <link href="/~detchar/summary/day/20171017/static/gwsumm.min.css" media="all" rel="stylesheet" type="text/css"/>
+  <title>
+   Nonlinear Regression
+  </title>
+  <script src="//code.jquery.com/jquery-1.12.3.min.js" type="text/javascript">
+  </script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js" type="text/javascript">
+  </script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript">
+  </script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.pack.js" type="text/javascript">
+  </script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js" type="text/javascript">
+  </script>
+  <script src="/~detchar/summary/day/20171017/static/bootstrap-ligo.min.js" type="text/javascript">
+  </script>
+  <script src="../gwsumm.min.js">
+  </script>
+ </head>
+ <style style="text/css">
+  .hoverTable{
+        width:100%; 
+        border-collapse:collapse; 
+        font-family: arial, sans-serif;
+    }
+    .hoverTable td{ 
+        padding:8px;
+        border:#dddddd 1px solid;
+        text-align: left;
+    }
+    .hoverTable th{ 
+        padding:8px;
+        border:#dddddd 1px solid;
+        text-align: left;
+        font-size: 20;
+    }
+    .hoverTable tr:nth-child(2n) {
+      background-color: #dddddd;
+    }
+
+    .hoverTable tr:nth-child(2n):hover, .hoverTable tr:hover {
+      background-color: #a8ebb2;
+    }
+
+    .hoverTable tr {
+      background-color: white;
+    }
+ </style>
+ <body>
+  <header class="navbar navbar-fixed-top navbar-all" role="banner">
+   <div class="container">
+    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+     <span class="icon-bar">
+     </span>
+     <span class="icon-bar">
+     </span>
+     <span class="icon-bar">
+     </span>
+    </button>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <a class="navbar-brand step-back" onclick="stepDate(-1)" title="Step back">
+     «
+    </a>
+    <a class="navbar-brand dropdown-toggle" data-date="17-10-2017" data-date-format="dd-mm-yyyy" data-viewmode="0" id="calendar" title="Show/hide calendar">
+     10-17-2017
+     <b class="caret">
+     </b>
+    </a>
+    <a class="navbar-brand step-forward" onclick="stepDate(1)" title="Step forwards">
+     »
+    </a>
+    <nav class="collapse navbar-collapse" role="navigation">
+     <ul class="nav navbar-nav">
+<li>
+ <a href="../webpages.html">
+  Home
+ </a>
+</li>
+      <li>
+       <a href="index.html">
+        Today
+       </a>
+      </li>
+      <li>
+       <a href="/~detchar/summary/day/20171017">
+        Detchar Page
+       </a>
+      </li>
+      <li class="dropdown">
+       <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+        Runs
+        <span class="caret">
+        </span>
+       </a>
+       <ul class="dropdown-menu">
+        <li>
+         <a href="LSTM-MLP-0.html">
+          LSTM vs. MLP
+         </a>
+        </li>
+       </ul>
+      </li>
+     </ul>
+    </nav>
+   </div>
+  </header>
+  <div class="container">
+   <h2>
+    Nonlinear Regression Summary
+   </h2>
+   <div class="panel-default panel">
+    <div class="panel-heading">
+     <h3>
+      How to navigate this page
+     </h3>
+    </div>
+    <div class="panel-body">
+     <ul>
+      <li>
+       The information displayed on this page briefly summarizes
+                    some of the aspects between training models from 
+                    the
+       <b>
+        most recent run
+       </b>
+       of the NonlinearRegression
+                    package. Previous run analyses can be viewed by
+                    clicking on the "Runs" dropdown menu and selecting
+                    a given comparison.
+      </li>
+     </ul>
+    </div>
+   </div>
+   <div class="panel-default panel">
+    <div class="panel-heading">
+     <h3>
+      Relative Training and Validation Losses
+     </h3>
+    </div>
+    <div class="panel-body">
+     <img src="LSTM-MLP-testing-losses.png" style="float: left; width: 48%; margin-right: 1%; margin-bottom: 0.5em;"/>
+     <img src="LSTM-MLP-training-losses.png" style="float: left; width: 48%; margin-right: 1%; margin-bottom: 0.5em;"/>
+    </div>
+   </div>
+   <div class="panel-default panel">
+    <div class="panel-heading">
+     <h3>
+      "Best of"
+     </h3>
+    </div>
+    <div class="panel-body">
+     <table class="hoverTable">
+      <tr>
+       <th>
+        Category
+       </th>
+       <th>
+        Model
+       </th>
+       <th>
+        Result
+       </th>
+      </tr>
+      <tr>
+       <td>
+        Lowest Final Training Loss
+       </td>
+       <td>
+        MLP
+       </td>
+       <td>
+        0.0125135824705
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Lowest Final Validation Loss
+       </td>
+       <td>
+        MLP
+       </td>
+       <td>
+        0.0142389527655
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Most Improved Learning During Training
+       </td>
+       <td>
+        MLP
+       </td>
+       <td>
+        0.85810755307%
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Most Improved Learning During Testing
+       </td>
+       <td>
+        MLP
+       </td>
+       <td>
+        71.6582279513%
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Best Achievable Loss
+       </td>
+       <td>
+        LSTM
+       </td>
+       <td>
+        1.03392658785e-36
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Best Achievable Loss
+       </td>
+       <td>
+        MLP
+       </td>
+       <td>
+        0.0
+       </td>
+      </tr>
+     </table>
+    </div>
+   </div>
+   <div class="panel-default panel">
+    <div class="panel-heading">
+     <h3>
+      Network Architectures LSTM vs. MLP
+     </h3>
+    </div>
+    <div class="panel-body">
+     <img src="LSTM-model.png" style="float: left; width: 48.0%; margin-right: 1%; margin-bottom: 0.5em;"/>
+     <img src="MLP-model.png" style="float: left; width: 48.0%; margin-right: 1%; margin-bottom: 0.5em;"/>
+    </div>
+   </div>
+  </div>
+  <footer class="footer">
+   <div class="container">
+    <div class="row">
+     <div class="col-md-12">
+      <p>
+       NonlinearRegression v0.1 © 2017.
+      </p>
+      <p>
+       This software was created at the California Institute of Technology
+                by Rana Adhikari, Rich Ormiston, Michael Coughlin, Andrew Matas,
+                Eric Quintero, Jenne Driggers, Nikhil Mukund, Thomas Massinger, Lydia
+                Nevin, Hang Yu and Rory James Smith
+      </p>
+     </div>
+    </div>
+   </div>
+  </footer>
+ </body>
+</html>

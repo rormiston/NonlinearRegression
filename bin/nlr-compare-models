@@ -1,0 +1,192 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import argparse
+import sys
+import os
+import re
+from gwpy.time import tconvert
+from datetime import datetime
+from ConfigParser import ConfigParser
+from collections import OrderedDict
+from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoader
+from NonlinearRegression.tools import nlr_exceptions
+import NonlinearRegression.tools.analyze_run_data as nlr
+import NonlinearRegression.tools.analyze_run_data as ard
+
+
+# Get environmental params
+env = Environment(loader     = PackageLoader('NonlinearRegression', 'templates'),
+                  autoescape = select_autoescape(['html']))
+
+default_ini = os.getenv('HOME') + '/noise_cancellation/configs/configs.ini'
+
+
+# Parse the input flags
+def parse_command_line():
+    """
+    parse command line flags
+    """
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--ini-file", "-i",
+                        help  = "Full path to ini file",
+                        dest  = "ini_file",
+                        default = default_ini,
+                        type  = str)
+
+    params = parser.parse_args()
+    return params
+
+
+# Read the config file
+params   = parse_command_line()
+ini_file = params.ini_file
+nlr_exceptions.checkFileExists(ini_file)
+settings = ConfigParser()
+settings.read(ini_file)
+
+# Use regular expressions to parse the config file so we dont 
+# need to worry about sticking with a particular convention
+regex  = re.compile(r'\w+')
+models = sorted(regex.findall(settings.get('run', 'models')))
+
+models_dict = {}
+for model in models:
+    regex_model = re.compile(r'[a-zA-Z]+')
+    basemodel   = regex_model.findall(model)[0]
+    regex_num   = re.compile(r'\d+')
+    try:
+        version = regex_num.findall(model)[0]
+    except IndexError:
+        version = 0
+
+    models_dict[basemodel] = version
+
+if len(models) == 0:
+    print("Must specify models to compare in the config file here:")
+    print(default_ini)
+    sys.exit(1)
+
+basedir    = settings.get('run', 'basedir')
+param_dir  = basedir + "/NonlinearRegression/tensorflow/timedelay/params/"
+model_data = {}
+
+# Save the data for each model to a dict for filling the webpage
+for model, version in models_dict.items():
+    model_path = param_dir  + model
+    chan_list  = model_path + "/channel_list-{}.txt".format(version)
+    ini_file   = model_path + "/{0}-{1}.ini".format(model, version)
+    fig_path   = model_path + "/Figures/"
+    loss       = fig_path   + "loss_history_comparison-{}.png".format(version)
+    validation = fig_path   + "TF-bilinear-validation-{}.png".format(version)
+
+    # chop the paths 
+    loss       = loss.split('NonlinearRegression/')[-1]
+    validation = validation.split('NonlinearRegression/')[-1]
+
+    # Make sure the file exists and read it
+    nlr_exceptions.checkFileExists(ini_file)
+    configs = ConfigParser()
+    configs.read(ini_file)
+
+    optimizer_tuples = configs.items('optimizer')
+    optimizer_tuples = ard.sort_optimizer_info(optimizer_tuples)
+    optimizer_tuples.sort(key=lambda tup: tup[0])
+
+    run_test_tuples = configs.items('run_test')
+    run_test_tuples.sort(key=lambda tup: tup[0])
+
+    # Get channel list
+    channels = ard.read_channel_list(chan_list)
+
+    model_data[model]               = {}
+    model_data[model]['loss']       = loss
+    model_data[model]['validation'] = validation
+    model_data[model]['ini']        = ini_file
+    model_data[model]['opt_tup']    = optimizer_tuples
+    model_data[model]['run_tup']    = run_test_tuples
+    model_data[model]['chan_list']  = channels
+    model_data                      = OrderedDict(sorted(model_data.items()))
+
+# Make sure all channel lists are the same length
+model_data = ard.adjust_chan_list_length(model_data)
+
+# Get the names of the optimizers
+opt_names = {}
+for key in model_data.keys():
+    old_tup        = model_data[key]['opt_tup'] 
+    new_tup        = [t for t in old_tup if not "name" in t] 
+    opt_name       = [ot[1] for ot in old_tup if "name" in ot][0]
+    opt_names[key] = opt_name
+
+    model_data[key]['opt_tup'] = new_tup
+
+# Get time for webpages
+starttime = tconvert(tconvert('now'))
+daystart  = int(tconvert(datetime(starttime.year,
+                                  starttime.month,
+                                  starttime.day)))
+
+save_webpage_str = '%d%02d%02d' % (starttime.year,
+                                   starttime.month,
+                                   starttime.day)
+
+# Various date strings needed for the webpage
+datestrmdy         = '%02d-%02d-%d' % (starttime.month, starttime.day, starttime.year)
+datestrdmy         = '%02d-%02d-%d' % (starttime.day, starttime.month, starttime.year)
+datestrymd         = '%d%02d%02d'   % (starttime.year, starttime.month, starttime.day)
+to_HTML            = '/NonlinearRegression/HTML/{}/'.format(save_webpage_str)
+webpage_output_dir = basedir + to_HTML
+
+# Make sure path exists
+if not os.path.isdir(webpage_output_dir):
+    os.makedirs(webpage_output_dir)
+
+# Set up some more misc. params
+Nfiles      = len([x for x in os.listdir(webpage_output_dir) if not "index" in x if not "png" in x])
+file_name   = ' & '.join(models)
+temp_fname  = '-'.join(models) + '-{}.html'.format(Nfiles)
+output_name = webpage_output_dir + temp_fname
+current     = ' vs. '.join(models)
+
+if len(model_data.keys()) == 1:
+    img_size = 70.0
+else:
+    img_size = 97.0 // len(model_data.keys())
+
+# make sure new html exists before trying to write to it
+if not os.path.isfile(output_name):
+    os.system('touch {}'.format(output_name))
+
+# Get all run names for dropdown menu
+runs      = os.listdir(webpage_output_dir)
+runs      = [r for r in runs if r != "index.html"]
+runs      = [r for r in runs if not r.endswith(".png")]
+run_names = [' vs. '.join(run.split('-')[:-1]) for run in runs]
+runs.append(temp_fname)
+
+# Give each link a version number for clarity
+version = 1
+for index, name in enumerate(run_names):
+    temp = run_names[:index]
+    if name in temp:
+        name = '{0} v{1}'.format(name, version)
+        run_names[index] = name
+        version += 1
+
+# fill in the template
+template = nlr_exceptions.loadTemplate(env, 'compare_models.html')
+webpage  = open(output_name, 'w')
+print >> webpage, template.render(datestrdmy = datestrdmy,
+                                  datestrmdy = datestrmdy,
+                                  datestrymd = datestrymd,
+                                  model_data = model_data,
+                                  opt_names  = opt_names,
+                                  runs       = runs,
+                                  run_names  = run_names,
+                                  current    = current[0],
+                                  img_size   = img_size)
+webpage.close()
+
+os.system('nlr-build-homepage -i {}'.format(params.ini_file))
+print('[+] Webpages built successfully')
